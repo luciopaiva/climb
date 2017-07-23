@@ -160,24 +160,31 @@ ClimbApp.CLIMB_URL_PREFIX = 'climbs/';
 ClimbApp.CLIMB_URL_SUFFIX = '.json';
 ClimbApp.CLIMB_URLS = [
     'alpe-dhuez',
+    // 'alto-de-letras',
     // 'alto-da-boa-vista-via-itanhanga',
     // 'alto-da-boa-vista-via-tijuca',
     'col-dizoard',
     'col-du-galibier',
     'estrada-das-canoas',
+    // 'mauna-kea',
     'mesa-do-imperador',
+    // 'passo-dello-stelvio',
     // 'serra-de-petropolis',
+    'serra-do-rio-do-rastro',
 ];
 ClimbApp.CLIMB_NAMES = [
     "Alpe d'Huez",
+    // "Alto de Letras",
     // "Alto da Boa Vista via Itanhangá",
     // "Alto da Boa Vista via Tijuca",
     "Col d'Izoard",
     "Col du Galibier",
     "Estrada das Canoas",
+    // "Mauna Kea",
     "Mesa do Imperador",
+    // "Passo dello Stelvio",
     // "Serra de Petropolis",
-    // 'Alto da Boa Vista via Tijuca', 'Mesa do Imperador',
+    "Serra do Rio do Rastro",
 ];
 
 const app = new ClimbApp();
