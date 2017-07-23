@@ -48,21 +48,38 @@ class ClimbApp {
         const HEIGHT = readCSSVariableAsNumber('height');
         const PADDING = readCSSVariableAsNumber('padding');
 
+        // domain extent
         const maximumDistance = d3.max(climbs, climb => climb.distance[climb.distance.length - 1]);
         const maximumAltitude = d3.max(climbs, climb => d3.max(climb.altitude));
 
-        console.info(`Maximum distance: ${maximumDistance} meters`);
-        console.info(`Maximum altitude: ${maximumAltitude} meters`);
-
+        // scales
         this.distanceScale = d3.scaleLinear().range([PADDING, WIDTH - PADDING * 2]).domain([0, maximumDistance]);
         this.altitudeScale = d3.scaleLinear().range([HEIGHT - PADDING * 2, PADDING]).domain([0, maximumAltitude]);
 
+        // x axis
         const xAxis = d3.axisBottom(this.distanceScale);
+        this.climbChart.append('g').attr('transform', `translate(0, ${HEIGHT - PADDING * 2})`)
+            .classed('axis x-axis', true)
+            .call(xAxis)
+            .append('text')
+            .classed('axis-description', true)
+            .attr('transform', `translate(${this.distanceScale(maximumDistance / 2)}, 40)`)
+            .attr('text-anchor', 'middle')
+            .text('Distance (meters)');
+
+        // y axis
         const yAxis = d3.axisLeft(this.altitudeScale);
+        this.climbChart.append('g').attr('transform', `translate(${PADDING}, 0)`)
+            .classed('axis y-axis', true)
+            .call(yAxis)
+            .append('text')
+            .classed('axis-description', true)
+            .attr('transform', `translate(${0},${this.altitudeScale(maximumAltitude / 2)}) rotate(270)`)
+            .attr('dy', '-45')
+            .attr('text-anchor', 'middle')
+            .text('Altitude (meters)');
 
-        this.climbChart.append('g').attr('transform', `translate(0, ${HEIGHT - PADDING * 2})`).call(xAxis);
-        this.climbChart.append('g').attr('transform', `translate(${PADDING}, 0)`).call(yAxis);
-
+        // prepare line function for every climb that will be drawn
         this.lineFunction = d3.line().x(d => this.distanceScale(d[0])).y(d => this.altitudeScale(d[1]));
     }
 
