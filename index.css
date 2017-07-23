@@ -4,7 +4,7 @@
     --height: 562px;  /* 16:9 aspect ratio */
     --padding: 60px;  /* slack inside SVG element, on every side */
     --margin-right: 70px;  /* leave some space for climb names to appear on the right */
-    --checkbox-gap: 30px;
+    --checkbox-gap: 40px;
 }
 
 body {
@@ -48,5 +48,5 @@ body {
 
 #climb-checkbox-container {
     position: relative;
-    left: 500px;
+    left: 330px;
 }

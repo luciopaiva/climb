@@ -25,6 +25,7 @@ class Climb {
         this.visible = visible;
         /** @type {{ distance: number[], altitude: number[] }[]} */
         this.data = null;
+        this.svgGroupElement = null;
     }
 }
 Climb.NEXT_INDEX = 0;
@@ -47,7 +48,7 @@ class ClimbApp {
         const promises = await Promise.all([downloadPromise, domPromise]);
 
         /** @type {Climb[]} */
-        const climbs = promises[0];
+        this.climbs = promises[0];
 
         this.climbChart = null;
         this.climbChartContainer = null;
@@ -58,18 +59,32 @@ class ClimbApp {
         this.checkBoxTemplate = document.getElementById('climb-checkbox-template');
         this.checkBoxContainer = document.getElementById('climb-checkbox-container');
         this.checkBoxGapInPixels = readCSSVariableAsNumber('checkbox-gap');
-        this.prepareChart(climbs);
+        this.prepareChart();
 
-        for (const climb of climbs) {
+        for (const climb of this.climbs) {
             this.loadClimbComponents(climb);
+        }
+    }
+
+    updateView() {
+        // domain extent
+        const visibleClimbs = this.climbs.filter(climb => climb.visible);
+        const maximumDistance = d3.max(visibleClimbs, climb => climb.data.distance[climb.data.distance.length - 1]);
+        const maximumAltitude = d3.max(visibleClimbs, climb => d3.max(climb.data.altitude));
+
+        // update scale domain
+        this.distanceScale = d3.scaleLinear().domain([0, maximumDistance]);
+        this.altitudeScale = d3.scaleLinear().domain([0, maximumAltitude]);
+
+        for (const climb of this.climbs) {
+            climb.svgGroupElement.classed('hidden', !climb.visible);
         }
     }
 
     /**
      * Chart setup stuff.
-     * @param {Climb[]} climbs
      */
-    prepareChart(climbs) {
+    prepareChart() {
         this.climbChart = d3.select('#climb-chart').append('g').attr('transform', 'translate(0,0)');
 
         const MARGIN_RIGHT = readCSSVariableAsNumber('margin-right');
@@ -78,7 +93,7 @@ class ClimbApp {
         const PADDING = readCSSVariableAsNumber('padding');
 
         // domain extent
-        const visibleClimbs = climbs.filter(climb => climb.visible);
+        const visibleClimbs = this.climbs.filter(climb => climb.visible);
         const maximumDistance = d3.max(visibleClimbs, climb => climb.data.distance[climb.data.distance.length - 1]);
         const maximumAltitude = d3.max(visibleClimbs, climb => d3.max(climb.data.altitude));
 
@@ -129,8 +144,12 @@ class ClimbApp {
     makeCheckbox(climb) {
         const component = d3.select(this.checkBoxTemplate.cloneNode(true));
         component.style('left', (climb.id * this.checkBoxGapInPixels) + 'px');
-        component.select('input').attr('checked', climb.visible ? '' : null);
+        const input = component.select('input').attr('checked', climb.visible ? '' : null);
         component.select('span').text(climb.name);
+        component.node().addEventListener('change', () => {
+            climb.visible = input.node().checked;
+            this.updateView();
+        });
         this.checkBoxContainer.appendChild(component.node());
     }
 
@@ -153,6 +172,8 @@ class ClimbApp {
             .attr('transform', `translate(${nameX}, ${nameY})`)
             .attr('dx', '10')
             .text(climb.name);
+
+        climb.svgGroupElement = group;
     }
 
     /**
