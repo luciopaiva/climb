@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Climb</title>
+
+    <style>
+        :root {
+            --width: 1000px;
+            --height: 562px;  /* 16:9 aspect ratio */
+            --padding: 40px;
+        }
+
+        body {
+            font-family: sans-serif;
+        }
+
+        .container {
+            margin-left: auto;
+            margin-right: auto;
+            width: var(--width);
+            height: var(--height)
+        }
+
+        .line {
+            fill: none;
+            stroke: gray;
+            stroke-width: 1px;
+        }
+
+        #climb-chart {
+            width: var(--width);
+            height: var(--height);
+        }
+    </style>
+
+    <script src="d3.min.js"></script>
+    <script src="index.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Climb Comparison</h1>
+    <svg id="climb-chart"></svg>
+</div>
+
+</body>
+</html>
