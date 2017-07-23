@@ -16,6 +16,10 @@
             font-family: sans-serif;
         }
 
+        .hidden {
+            display: none;
+        }
+
         .axis-description {
             fill: black;
             font-size: 120%;
@@ -47,6 +51,11 @@
 
 <div class="container">
     <h1>Climb Comparison</h1>
+    <div class="hidden">
+        <div id="climb-checkbox-template"><label><input type="checkbox"><span></span></label></div>
+    </div>
+    <div id="climb-checkbox-container">
+    </div>
     <svg id="climb-chart"></svg>
 </div>
 

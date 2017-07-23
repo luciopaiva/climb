@@ -6,6 +6,24 @@ function readCSSVariableAsNumber(variableName) {
 }
 
 
+class Climb {
+    /**
+     * @param {string} name
+     * @param {string} url
+     * @param {boolean} visible
+     */
+    constructor (name, url, visible = true) {
+        this.name = name;
+        this.url = Climb.CLIMB_URL_PREFIX + url + Climb.CLIMB_URL_SUFFIX;
+        this.visible = visible;
+        /** @type {{ distance: number[], altitude: number[] }[]} */
+        this.data = null;
+    }
+}
+Climb.CLIMB_URL_PREFIX = 'climbs/';
+Climb.CLIMB_URL_SUFFIX = '.json';
+
+
 class ClimbApp {
 
     constructor () {
@@ -20,25 +38,27 @@ class ClimbApp {
         const domPromise = this.waitForDomContentLoaded();
         const promises = await Promise.all([downloadPromise, domPromise]);
 
-        /** @type {{ distance: number[], altitude: number[] }[]} */
+        /** @type {Climb[]} */
         const climbs = promises[0];
 
         this.climbChart = null;
+        this.climbChartContainer = null;
         this.distanceScale = null;
         this.altitudeScale = null;
         this.lineFunction = null;
 
+        this.checkBoxTemplate = document.getElementById('climb-checkbox-template');
+        this.checkBoxContainer = document.getElementById('climb-checkbox-container');
         this.prepareChart(climbs);
-        for (let climbIndex = 0; climbIndex < climbs.length; climbIndex++) {
-            const climb = climbs[climbIndex];
-            const climbName = ClimbApp.CLIMB_NAMES[climbIndex];
-            this.drawClimb(climb, climbName);
+
+        for (const climb of climbs) {
+            this.loadClimbComponents(climb);
         }
     }
 
     /**
      * Chart setup stuff.
-     * @param {{ distance: number[], altitude: number[] }[]} climbs
+     * @param {Climb[]} climbs
      */
     prepareChart(climbs) {
         this.climbChart = d3.select('#climb-chart').append('g').attr('transform', 'translate(0,0)');
@@ -49,11 +69,12 @@ class ClimbApp {
         const PADDING = readCSSVariableAsNumber('padding');
 
         // domain extent
-        const maximumDistance = d3.max(climbs, climb => climb.distance[climb.distance.length - 1]);
-        const maximumAltitude = d3.max(climbs, climb => d3.max(climb.altitude));
+        const visibleClimbs = climbs.filter(climb => climb.visible);
+        const maximumDistance = d3.max(visibleClimbs, climb => climb.data.distance[climb.data.distance.length - 1]);
+        const maximumAltitude = d3.max(visibleClimbs, climb => d3.max(climb.data.altitude));
 
         // scales
-        this.distanceScale = d3.scaleLinear().range([PADDING, WIDTH - PADDING * 2]).domain([0, maximumDistance]);
+        this.distanceScale = d3.scaleLinear().range([PADDING, WIDTH - PADDING]).domain([0, maximumDistance]);
         this.altitudeScale = d3.scaleLinear().range([HEIGHT - PADDING * 2, PADDING]).domain([0, maximumAltitude]);
 
         // x axis
@@ -81,25 +102,47 @@ class ClimbApp {
 
         // prepare line function for every climb that will be drawn
         this.lineFunction = d3.line().x(d => this.distanceScale(d[0])).y(d => this.altitudeScale(d[1]));
+
+        this.climbChartContainer = this.climbChart.append('g');
+    }
+
+    /**
+     * @param {Climb} climb
+     */
+    loadClimbComponents(climb) {
+        this.makeCheckbox(climb);
+        this.drawClimb(climb);
+    }
+
+    /**
+     * @param {Climb} climb
+     */
+    makeCheckbox(climb) {
+        const component = d3.select(this.checkBoxTemplate.cloneNode(true));
+        component.select('input').attr('checked', climb.visible ? '' : null);
+        component.select('span').text(climb.name);
+        this.checkBoxContainer.appendChild(component.node());
     }
 
     /**
      * Draw climb.
-     * @param {{ distance: number[], altitude: number[] }} climb
-     * @param {string} climbName
+     * @param {Climb} climb
      */
-    drawClimb(climb, climbName) {
+    drawClimb(climb) {
         // convert to [distance, altitude] pairs
-        const climbPairs = climb.distance.map((distance, i) => [distance, climb.altitude[i]]);
-        this.climbChart.append('path').data([climbPairs]).classed('line', true).attr('d', this.lineFunction);
+        const climbPairs = climb.data.distance.map((distance, i) => [distance, climb.data.altitude[i]]);
+        const group = this.climbChartContainer.append('g');
+        group.classed('hidden', !climb.visible);
+
+        group.append('path').data([climbPairs]).classed('line', true).attr('d', this.lineFunction);
 
         const lastPoint = climbPairs[climbPairs.length - 1];
         const nameX = this.distanceScale(lastPoint[0]);
         const nameY = this.altitudeScale(lastPoint[1]);
-        this.climbChart.append('text')
+        group.append('text')
             .attr('transform', `translate(${nameX}, ${nameY})`)
             .attr('dx', '10')
-            .text(climbName);
+            .text(climb.name);
     }
 
     /**
@@ -108,9 +151,9 @@ class ClimbApp {
      * @return {Promise<object[]>}
      */
     downloadData() {
-        const promises = ClimbApp.CLIMB_URLS
-            .map(urlPart => ClimbApp.CLIMB_URL_PREFIX + urlPart + ClimbApp.CLIMB_URL_SUFFIX)
-            .map(url => this.downloadJson(url));
+        const promises = ClimbApp.CLIMBS
+            .map(climb => this.downloadJson(climb.url)
+                .then(data => {climb.data = data; return climb}));
         return Promise.all(promises);
     }
 
@@ -156,35 +199,19 @@ class ClimbApp {
     }
 }
 
-ClimbApp.CLIMB_URL_PREFIX = 'climbs/';
-ClimbApp.CLIMB_URL_SUFFIX = '.json';
-ClimbApp.CLIMB_URLS = [
-    'alpe-dhuez',
-    // 'alto-de-letras',
-    // 'alto-da-boa-vista-via-itanhanga',
-    // 'alto-da-boa-vista-via-tijuca',
-    'col-dizoard',
-    'col-du-galibier',
-    'estrada-das-canoas',
-    // 'mauna-kea',
-    'mesa-do-imperador',
-    // 'passo-dello-stelvio',
-    // 'serra-de-petropolis',
-    'serra-do-rio-do-rastro',
-];
-ClimbApp.CLIMB_NAMES = [
-    "Alpe d'Huez",
-    // "Alto de Letras",
-    // "Alto da Boa Vista via Itanhangá",
-    // "Alto da Boa Vista via Tijuca",
-    "Col d'Izoard",
-    "Col du Galibier",
-    "Estrada das Canoas",
-    // "Mauna Kea",
-    "Mesa do Imperador",
-    // "Passo dello Stelvio",
-    // "Serra de Petropolis",
-    "Serra do Rio do Rastro",
+ClimbApp.CLIMBS = [
+    new Climb("Alpe d'Huez", 'alpe-dhuez'),
+    new Climb("Alto de Letras", 'alto-de-letras', false),
+    new Climb("Alto da Boa Vista via Itanhangá", 'alto-da-boa-vista-via-itanhanga', false),
+    new Climb("Alto da Boa Vista via Tijuca", 'alto-da-boa-vista-via-tijuca', false),
+    new Climb("Col d'Izoard", 'col-dizoard'),
+    new Climb("Col du Galibier", 'col-du-galibier'),
+    new Climb("Estrada das Canoas", 'estrada-das-canoas'),
+    new Climb("Mauna Kea", 'mauna-kea', false),
+    new Climb("Mesa do Imperador", 'mesa-do-imperador'),
+    new Climb("Passo dello Stelvio", 'passo-dello-stelvio', false),
+    new Climb("Serra de Petrópolis", 'serra-de-petropolis', false),
+    new Climb("Serra do Rio do Rastro", 'serra-do-rio-do-rastro'),
 ];
 
 const app = new ClimbApp();
