@@ -186,6 +186,7 @@ class ClimbApp {
         climb.climbPairs = climb.data.distance.map((distance, i) => [distance, climb.data.altitude[i]]);
 
         const group = this.climbChartContainer.append('g');
+        group.classed('climb', true);
         group.classed('hidden', !climb.visible);
 
         group.append('path').data([climb.climbPairs]).classed('line', true).attr('d', this.lineFunction);
@@ -274,7 +275,7 @@ class ClimbApp {
     }
 }
 
-ClimbApp.TRANSITION_DURATION_IN_MILLIS = 1000;
+ClimbApp.TRANSITION_DURATION_IN_MILLIS = 600;
 
 ClimbApp.CLIMBS = [
     new Climb("Alpe d'Huez", 'alpe-dhuez'),

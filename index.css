@@ -5,10 +5,16 @@
     --padding: 60px;  /* slack inside SVG element, on every side */
     --margin-right: 70px;  /* leave some space for climb names to appear on the right */
     --checkbox-gap: 40px;
+    --text-color: rgb(28, 95, 148);
 }
 
 body {
-    font-family: sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+hr {
+    border: none;
+    border-bottom: 1px solid #eee;
 }
 
 .hidden {
@@ -33,12 +39,22 @@ body {
     transform-origin: left;
     transform: rotate(-30deg);
     font-size: 80%;
+    color: var(--text-color);
 }
 
 .line {
     fill: none;
-    stroke: gray;
+    stroke: var(--text-color);
     stroke-width: 1px;
+}
+
+g.climb text {
+    fill: var(--text-color);
+}
+
+.footnote {
+    font-size: 70%;
+    text-align: right;
 }
 
 #climb-chart {
