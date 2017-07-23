@@ -1,6 +1,12 @@
 "use strict";
 
 
+/**
+ * Utility function to read a CSS variable, converting it to a number. Beware that `calc()` or `var()` won't be
+ * expanded!
+ * @param {string} variableName
+ * @return {number}
+ */
 function readCSSVariableAsNumber(variableName) {
     return parseInt(window.getComputedStyle(document.documentElement).getPropertyValue('--' + variableName), 10);
 }
@@ -13,6 +19,7 @@ class Climb {
      * @param {boolean} visible
      */
     constructor (name, url, visible = true) {
+        this.id = Climb.NEXT_INDEX++;
         this.name = name;
         this.url = Climb.CLIMB_URL_PREFIX + url + Climb.CLIMB_URL_SUFFIX;
         this.visible = visible;
@@ -20,6 +27,7 @@ class Climb {
         this.data = null;
     }
 }
+Climb.NEXT_INDEX = 0;
 Climb.CLIMB_URL_PREFIX = 'climbs/';
 Climb.CLIMB_URL_SUFFIX = '.json';
 
@@ -49,6 +57,7 @@ class ClimbApp {
 
         this.checkBoxTemplate = document.getElementById('climb-checkbox-template');
         this.checkBoxContainer = document.getElementById('climb-checkbox-container');
+        this.checkBoxGapInPixels = readCSSVariableAsNumber('checkbox-gap');
         this.prepareChart(climbs);
 
         for (const climb of climbs) {
@@ -119,6 +128,7 @@ class ClimbApp {
      */
     makeCheckbox(climb) {
         const component = d3.select(this.checkBoxTemplate.cloneNode(true));
+        component.style('left', (climb.id * this.checkBoxGapInPixels) + 'px');
         component.select('input').attr('checked', climb.visible ? '' : null);
         component.select('span').text(climb.name);
         this.checkBoxContainer.appendChild(component.node());
@@ -201,9 +211,9 @@ class ClimbApp {
 
 ClimbApp.CLIMBS = [
     new Climb("Alpe d'Huez", 'alpe-dhuez'),
+    new Climb("ABV via Itanhangá", 'alto-da-boa-vista-via-itanhanga', false),
+    new Climb("ABV via Tijuca", 'alto-da-boa-vista-via-tijuca', false),
     new Climb("Alto de Letras", 'alto-de-letras', false),
-    new Climb("Alto da Boa Vista via Itanhangá", 'alto-da-boa-vista-via-itanhanga', false),
-    new Climb("Alto da Boa Vista via Tijuca", 'alto-da-boa-vista-via-tijuca', false),
     new Climb("Col d'Izoard", 'col-dizoard'),
     new Climb("Col du Galibier", 'col-du-galibier'),
     new Climb("Estrada das Canoas", 'estrada-das-canoas'),

@@ -4,45 +4,7 @@
     <meta charset="UTF-8">
     <title>Climb</title>
 
-    <style>
-        :root {
-            --width: 1000px;  /* width of the page and the SVG element */
-            --height: 562px;  /* 16:9 aspect ratio */
-            --padding: 60px;  /* slack inside SVG element, on every side */
-            --margin-right: 70px;  /* leave some space for climb names to appear on the right */
-        }
-
-        body {
-            font-family: sans-serif;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .axis-description {
-            fill: black;
-            font-size: 120%;
-        }
-
-        .container {
-            margin-left: auto;
-            margin-right: auto;
-            width: var(--width);
-            height: var(--height)
-        }
-
-        .line {
-            fill: none;
-            stroke: gray;
-            stroke-width: 1px;
-        }
-
-        #climb-chart {
-            width: var(--width);
-            height: var(--height);
-        }
-    </style>
+    <link rel="stylesheet" href="index.css">
 
     <script src="d3.min.js"></script>
     <script src="index.js"></script>
@@ -52,7 +14,7 @@
 <div class="container">
     <h1>Climb Comparison</h1>
     <div class="hidden">
-        <div id="climb-checkbox-template"><label><input type="checkbox"><span></span></label></div>
+        <div id="climb-checkbox-template" class="climb-checkbox"><label><input type="checkbox"><span></span></label></div>
     </div>
     <div id="climb-checkbox-container">
     </div>

@@ -1,0 +1,52 @@
+
+:root {
+    --width: 1000px;  /* width of the page and the SVG element */
+    --height: 562px;  /* 16:9 aspect ratio */
+    --padding: 60px;  /* slack inside SVG element, on every side */
+    --margin-right: 70px;  /* leave some space for climb names to appear on the right */
+    --checkbox-gap: 30px;
+}
+
+body {
+    font-family: sans-serif;
+}
+
+.hidden {
+    display: none;
+}
+
+.axis-description {
+    fill: black;
+    font-size: 120%;
+}
+
+.container {
+    margin-left: auto;
+    margin-right: auto;
+    width: var(--width);
+    height: var(--height)
+}
+
+.climb-checkbox {
+    position: absolute;
+    top: 0;
+    transform-origin: left;
+    transform: rotate(-30deg);
+    font-size: 80%;
+}
+
+.line {
+    fill: none;
+    stroke: gray;
+    stroke-width: 1px;
+}
+
+#climb-chart {
+    width: var(--width);
+    height: var(--height);
+}
+
+#climb-checkbox-container {
+    position: relative;
+    left: 500px;
+}
