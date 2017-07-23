@@ -25,6 +25,8 @@ class Climb {
         this.visible = visible;
         /** @type {{ distance: number[], altitude: number[] }[]} */
         this.data = null;
+        /** @type {[number, number][]} */
+        this.climbPairs = null;
         this.svgGroupElement = null;
     }
 }
@@ -37,6 +39,7 @@ class ClimbApp {
 
     constructor () {
         this.pageLoadingPromise = null;
+        this.numberOfVisibleClimbs = 0;
     }
 
     /**
@@ -63,21 +66,31 @@ class ClimbApp {
 
         for (const climb of this.climbs) {
             this.loadClimbComponents(climb);
+            if (climb.visible) {
+                this.numberOfVisibleClimbs++;
+            }
         }
     }
 
     updateView() {
-        // domain extent
+        // calculate new domain extent based only on visible climbs
         const visibleClimbs = this.climbs.filter(climb => climb.visible);
         const maximumDistance = d3.max(visibleClimbs, climb => climb.data.distance[climb.data.distance.length - 1]);
         const maximumAltitude = d3.max(visibleClimbs, climb => d3.max(climb.data.altitude));
 
-        // update scale domain
-        this.distanceScale = d3.scaleLinear().domain([0, maximumDistance]);
-        this.altitudeScale = d3.scaleLinear().domain([0, maximumAltitude]);
+        // update scale domains
+        this.distanceScale.domain([0, maximumDistance]);
+        this.altitudeScale.domain([0, maximumAltitude]);
 
+        // reconfigure axes and redraw them on the chart with a soft transition
+        this.xAxis.scale(this.distanceScale);
+        this.yAxis.scale(this.altitudeScale);
+        this.xAxisGroup.transition().duration(ClimbApp.TRANSITION_DURATION_IN_MILLIS).call(this.xAxis);
+        this.yAxisGroup.transition().duration(ClimbApp.TRANSITION_DURATION_IN_MILLIS).call(this.yAxis);
+
+        // now redraw climbs according to the new scale
         for (const climb of this.climbs) {
-            climb.svgGroupElement.classed('hidden', !climb.visible);
+            this.updateClimbPath(climb);
         }
     }
 
@@ -102,10 +115,11 @@ class ClimbApp {
         this.altitudeScale = d3.scaleLinear().range([HEIGHT - PADDING * 2, PADDING]).domain([0, maximumAltitude]);
 
         // x axis
-        const xAxis = d3.axisBottom(this.distanceScale);
-        this.climbChart.append('g').attr('transform', `translate(0, ${HEIGHT - PADDING * 2})`)
+        this.xAxis = d3.axisBottom(this.distanceScale);
+        this.xAxisGroup = this.climbChart.append('g').attr('transform', `translate(0, ${HEIGHT - PADDING * 2})`)
             .classed('axis x-axis', true)
-            .call(xAxis)
+            .call(this.xAxis);
+        this.xAxisGroup
             .append('text')
             .classed('axis-description', true)
             .attr('transform', `translate(${this.distanceScale(maximumDistance / 2)}, 40)`)
@@ -113,10 +127,11 @@ class ClimbApp {
             .text('Distance (meters)');
 
         // y axis
-        const yAxis = d3.axisLeft(this.altitudeScale);
-        this.climbChart.append('g').attr('transform', `translate(${PADDING}, 0)`)
+        this.yAxis = d3.axisLeft(this.altitudeScale);
+        this.yAxisGroup = this.climbChart.append('g').attr('transform', `translate(${PADDING}, 0)`)
             .classed('axis y-axis', true)
-            .call(yAxis)
+            .call(this.yAxis);
+        this.yAxisGroup
             .append('text')
             .classed('axis-description', true)
             .attr('transform', `translate(${0},${this.altitudeScale(maximumAltitude / 2)}) rotate(270)`)
@@ -135,7 +150,7 @@ class ClimbApp {
      */
     loadClimbComponents(climb) {
         this.makeCheckbox(climb);
-        this.drawClimb(climb);
+        this.makeClimbPath(climb);
     }
 
     /**
@@ -148,6 +163,15 @@ class ClimbApp {
         component.select('span').text(climb.name);
         component.node().addEventListener('change', () => {
             climb.visible = input.node().checked;
+
+            // make sure that at least one check box is checked all the time, otherwise chart will break
+            this.numberOfVisibleClimbs += climb.visible ? +1 : -1;
+            if (this.numberOfVisibleClimbs === 1) {
+                d3.select(this.checkBoxContainer).select('input[checked]').attr('disabled', '');
+            } else {
+                d3.select(this.checkBoxContainer).select('input[disabled]').attr('disabled', null);
+            }
+
             this.updateView();
         });
         this.checkBoxContainer.appendChild(component.node());
@@ -157,15 +181,17 @@ class ClimbApp {
      * Draw climb.
      * @param {Climb} climb
      */
-    drawClimb(climb) {
+    makeClimbPath(climb) {
         // convert to [distance, altitude] pairs
-        const climbPairs = climb.data.distance.map((distance, i) => [distance, climb.data.altitude[i]]);
+        climb.climbPairs = climb.data.distance.map((distance, i) => [distance, climb.data.altitude[i]]);
+
         const group = this.climbChartContainer.append('g');
         group.classed('hidden', !climb.visible);
 
-        group.append('path').data([climbPairs]).classed('line', true).attr('d', this.lineFunction);
+        group.append('path').data([climb.climbPairs]).classed('line', true).attr('d', this.lineFunction);
 
-        const lastPoint = climbPairs[climbPairs.length - 1];
+        // write climb name
+        const lastPoint = climb.climbPairs[climb.climbPairs.length - 1];
         const nameX = this.distanceScale(lastPoint[0]);
         const nameY = this.altitudeScale(lastPoint[1]);
         group.append('text')
@@ -174,6 +200,24 @@ class ClimbApp {
             .text(climb.name);
 
         climb.svgGroupElement = group;
+    }
+
+    /**
+     * Draw climb.
+     * @param {Climb} climb
+     */
+    updateClimbPath(climb) {
+        climb.svgGroupElement.select('path')
+            .transition().duration(ClimbApp.TRANSITION_DURATION_IN_MILLIS).attr('d', this.lineFunction);
+
+        const lastPoint = climb.climbPairs[climb.climbPairs.length - 1];
+        const nameX = this.distanceScale(lastPoint[0]);
+        const nameY = this.altitudeScale(lastPoint[1]);
+        climb.svgGroupElement.select('text')
+            .transition().duration(ClimbApp.TRANSITION_DURATION_IN_MILLIS)
+            .attr('transform', `translate(${nameX}, ${nameY})`);
+
+        climb.svgGroupElement.classed('hidden', !climb.visible);
     }
 
     /**
@@ -229,6 +273,8 @@ class ClimbApp {
         return this.pageLoadingPromise;
     }
 }
+
+ClimbApp.TRANSITION_DURATION_IN_MILLIS = 1000;
 
 ClimbApp.CLIMBS = [
     new Climb("Alpe d'Huez", 'alpe-dhuez'),
