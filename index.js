@@ -29,8 +29,10 @@ class ClimbApp {
         this.lineFunction = null;
 
         this.prepareChart(climbs);
-        for (const climb of climbs) {
-            this.drawClimb(climb);
+        for (let climbIndex = 0; climbIndex < climbs.length; climbIndex++) {
+            const climb = climbs[climbIndex];
+            const climbName = ClimbApp.CLIMB_NAMES[climbIndex];
+            this.drawClimb(climb, climbName);
         }
     }
 
@@ -41,7 +43,8 @@ class ClimbApp {
     prepareChart(climbs) {
         this.climbChart = d3.select('#climb-chart').append('g').attr('transform', 'translate(0,0)');
 
-        const WIDTH = readCSSVariableAsNumber('width');
+        const MARGIN_RIGHT = readCSSVariableAsNumber('margin-right');
+        const WIDTH = readCSSVariableAsNumber('width') - MARGIN_RIGHT;
         const HEIGHT = readCSSVariableAsNumber('height');
         const PADDING = readCSSVariableAsNumber('padding');
 
@@ -66,11 +69,20 @@ class ClimbApp {
     /**
      * Draw climb.
      * @param {{ distance: number[], altitude: number[] }} climb
+     * @param {string} climbName
      */
-    drawClimb(climb) {
+    drawClimb(climb, climbName) {
         // convert to [distance, altitude] pairs
         const climbPairs = climb.distance.map((distance, i) => [distance, climb.altitude[i]]);
         this.climbChart.append('path').data([climbPairs]).classed('line', true).attr('d', this.lineFunction);
+
+        const lastPoint = climbPairs[climbPairs.length - 1];
+        const nameX = this.distanceScale(lastPoint[0]);
+        const nameY = this.altitudeScale(lastPoint[1]);
+        this.climbChart.append('text')
+            .attr('transform', `translate(${nameX}, ${nameY})`)
+            .attr('dx', '10')
+            .text(climbName);
     }
 
     /**
@@ -130,16 +142,26 @@ class ClimbApp {
 ClimbApp.CLIMB_URL_PREFIX = 'climbs/';
 ClimbApp.CLIMB_URL_SUFFIX = '.json';
 ClimbApp.CLIMB_URLS = [
-    // 'alpe-dhuez',
+    'alpe-dhuez',
     // 'alto-da-boa-vista-via-itanhanga',
     // 'alto-da-boa-vista-via-tijuca',
-    // 'col-dizoard',
-    // 'col-du-galibier',
+    'col-dizoard',
+    'col-du-galibier',
     'estrada-das-canoas',
     'mesa-do-imperador',
     // 'serra-de-petropolis',
 ];
-// ClimbApp.CLIMB_NAMES = ['Alto da Boa Vista via Tijuca', 'Mesa do Imperador'];
+ClimbApp.CLIMB_NAMES = [
+    "Alpe d'Huez",
+    // "Alto da Boa Vista via Itanhangá",
+    // "Alto da Boa Vista via Tijuca",
+    "Col d'Izoard",
+    "Col du Galibier",
+    "Estrada das Canoas",
+    "Mesa do Imperador",
+    // "Serra de Petropolis",
+    // 'Alto da Boa Vista via Tijuca', 'Mesa do Imperador',
+];
 
 const app = new ClimbApp();
 app.run();
