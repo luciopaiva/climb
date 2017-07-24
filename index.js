@@ -290,6 +290,7 @@ ClimbApp.CLIMBS = [
     new Climb("Passo dello Stelvio", 'passo-dello-stelvio', false),
     new Climb("Serra de Petrópolis", 'serra-de-petropolis', false),
     new Climb("Serra do Rio do Rastro", 'serra-do-rio-do-rastro'),
+    new Climb("Serra de Teresópolis", 'serra-de-teresopolis', false),
 ];
 
 const app = new ClimbApp();
