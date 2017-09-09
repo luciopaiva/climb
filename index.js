@@ -278,20 +278,22 @@ class ClimbApp {
 ClimbApp.TRANSITION_DURATION_IN_MILLIS = 600;
 
 ClimbApp.CLIMBS = [
-    new Climb("Alpe d'Huez", 'alpe-dhuez'),
-    new Climb("ABV via Itanhangá", 'alto-da-boa-vista-via-itanhanga', false),
-    new Climb("ABV via Tijuca", 'alto-da-boa-vista-via-tijuca', false),
-    new Climb("Alto de Letras", 'alto-de-letras', false),
-    new Climb("Alto de L'Angliru", 'alto-de-langliru', true),
-    new Climb("Col d'Izoard", 'col-dizoard'),
-    new Climb("Col du Galibier", 'col-du-galibier'),
-    new Climb("Estrada das Canoas", 'estrada-das-canoas'),
-    new Climb("Mauna Kea", 'mauna-kea', false),
-    new Climb("Mesa do Imperador", 'mesa-do-imperador'),
-    new Climb("Passo dello Stelvio", 'passo-dello-stelvio', false),
-    new Climb("Serra de Petrópolis", 'serra-de-petropolis', false),
-    new Climb("Serra do Rio do Rastro", 'serra-do-rio-do-rastro'),
-    new Climb("Serra de Teresópolis", 'serra-de-teresopolis', false),
+    new Climb("Alpe d'Huez", 'alpe-dhuez-652851'),
+    new Climb("ABV via Itanhangá", 'alto-da-boa-vista-via-itanhanga-6395726', false),
+    new Climb("ABV via Tijuca", 'alto-da-boa-vista-via-tijuca-638506', false),
+    new Climb("Alto de Letras", 'alto-de-letras-5608251', false),
+    new Climb("Alto de L'Angliru", 'alto-de-langliru-738025', true),
+    new Climb("Col d'Izoard", 'col-dizoard-616086'),
+    new Climb("Col du Galibier", 'col-du-galibier-5211636'),
+    new Climb("Estrada das Canoas", 'estrada-das-canoas-789126'),
+    new Climb("Mauna Kea", 'mauna-kea-1504789', false),
+    new Climb("Monte Zoncolan", 'monte-zoncolan-657601', false),
+    new Climb("Mortirolo", 'mortirolo-614726', false),
+    new Climb("Mesa do Imperador", 'mesa-do-imperador-635911'),
+    new Climb("Passo dello Stelvio", 'passo-dello-stelvio-951992', false),
+    new Climb("Serra de Petrópolis", 'serra-de-petropolis-689689', false),
+    new Climb("Serra do Rio do Rastro", 'serra-do-rio-do-rastro-872753'),
+    new Climb("Serra de Teresópolis", 'serra-de-teresopolis-737359', false),
 ];
 
 const app = new ClimbApp();
