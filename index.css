@@ -65,4 +65,9 @@ g.climb text {
 #climb-checkbox-container {
     position: relative;
     left: 330px;
+    top: 10px;
+}
+
+.strava-logo {
+    width: 16px;
 }

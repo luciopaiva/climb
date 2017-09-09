@@ -22,12 +22,21 @@ class Climb {
         this.id = Climb.NEXT_INDEX++;
         this.name = name;
         this.url = Climb.CLIMB_URL_PREFIX + url + Climb.CLIMB_URL_SUFFIX;
+        this.stravaId = Climb.extractStravaId(url);
         this.visible = visible;
         /** @type {{ distance: number[], altitude: number[] }[]} */
         this.data = null;
         /** @type {[number, number][]} */
         this.climbPairs = null;
         this.svgGroupElement = null;
+    }
+
+    static extractStravaId(url) {
+        const match = url.match(/\d+$/);
+        if (match !== null && match[0].length > 0) {
+            return match[0];
+        }
+        return null;
     }
 }
 Climb.NEXT_INDEX = 0;
@@ -161,6 +170,7 @@ class ClimbApp {
         component.style('left', (climb.id * this.checkBoxGapInPixels) + 'px');
         const input = component.select('input').attr('checked', climb.visible ? '' : null);
         component.select('span').text(climb.name);
+        component.select('a').attr('href', `https://www.strava.com/segments/${climb.stravaId}`);
         component.node().addEventListener('change', () => {
             climb.visible = input.node().checked;
 
