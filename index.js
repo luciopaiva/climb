@@ -282,6 +282,7 @@ ClimbApp.CLIMBS = [
     new Climb("ABV via Itanhangá", 'alto-da-boa-vista-via-itanhanga', false),
     new Climb("ABV via Tijuca", 'alto-da-boa-vista-via-tijuca', false),
     new Climb("Alto de Letras", 'alto-de-letras', false),
+    new Climb("Alto de L'Angliru", 'alto-de-langliru', true),
     new Climb("Col d'Izoard", 'col-dizoard'),
     new Climb("Col du Galibier", 'col-du-galibier'),
     new Climb("Estrada das Canoas", 'estrada-das-canoas'),
